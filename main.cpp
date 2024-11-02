@@ -8,6 +8,10 @@
 #include <iostream>
 #include "engine_core.h"
 
+// Define PLAY_AS_WHITE to choose whether you play as White or Black
+// Uncomment the line below to play as White, or comment it out to play as Black
+#define PLAY_AS_WHITE
+
 uint16_t string_to_move(std::string str){
     uint16_t source = ((int)str[0] - (int) 'a') + ((int) str[1] - (int) '1') * 8;
     uint16_t dest = ((int)str[2] - (int) 'a') + ((int) str[3] - (int) '1') * 8;
@@ -33,29 +37,31 @@ int main(int argc, const char * argv[]) {
     for(int k = 0; k < 1; k++){
         //engine.board_manager.set_board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
         for(int i = 0; i < 100; i++){
-            //random playing as black
-            if(engine.is_checkmate()){
-                std::cout << "Black Wins \n";
+            if (engine.is_checkmate()) {
+                std::cout << (i % 2 == 0 ? "Black Wins\n" : "White Wins\n");
                 break;
             }
             
-            uint16_t engine_move = engine.search_iterate(10000);
-            print_move(engine_move);
-            std::cout << " ";
-            engine.board_manager.make_move(engine_move);
-            //engine1.board_manager.make_move(engine_move);
-            if(engine.is_checkmate()){
-                std::cout << "White Wins \n";
-                break;
+#ifdef PLAY_AS_WHITE
+            // If playing as White, player goes first (even turns)
+            if (i % 2 == 0) {
+#else
+            // If playing as Black, engine goes first (even turns)
+            if (i % 2 != 0) {
+#endif
+                std::string s;
+                std::cout << "\nEnter move: ";
+                std::cin >> s;
+                engine.board_manager.make_move(string_to_move(s));
+                std::cout << "\n";
+                engine.print_board();
+            } else { 
+                // Engine's move
+                uint16_t engine_move = engine.search_iterate(10000);
+                print_move(engine_move);
+                std::cout << " ";
+                engine.board_manager.make_move(engine_move);
             }
-            
-            
-            std::string s;
-            std::cout << "\nEnter move: ";
-            std::cin >> s;
-            engine.board_manager.make_move(string_to_move(s));
-            std::cout << "\n";
-            engine.print_board();
             std::cout << "\n";
             
             /*

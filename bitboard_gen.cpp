@@ -6,9 +6,18 @@
 //
 #include "bitboard_gen.h"
 
-inline U64 reverse(U64 b) {
-    return OSSwapInt64(b);
-}
+#if defined(__APPLE__)
+    #include <libkern/OSByteOrder.h>
+    #define reverse(x) OSSwapInt64(x)
+#elif defined(__linux__)
+    #include <byteswap.h>
+    #define reverse(x) __bswap_64(x)
+#elif defined(_WIN32)
+    #include <stdlib.h>
+    #define reverse(x) _byteswap_uint64(x)
+#else
+    #error "Byte swapping function not defined for this platform."
+#endif
 
 U64 mirror(U64 x) {
    U64 k1 = (0x5555555555555555);

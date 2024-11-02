@@ -5,6 +5,7 @@
 //  Created by Harry Chiu on 10/27/24.
 //
 #include <cassert>
+#include <cstdint>
 
 // xorshift64star Pseudo-Random Number Generator
 // This class is based on original code written and dedicated
