@@ -6,12 +6,29 @@
 //
 #include <iostream>
 #include <string>
-#include <libkern/OSByteOrder.h>
+#include <cstdint>
 #include "utility.h"
 #include "transposition.h"
+#include <unordered_map>
 
 #ifndef BITBOARD_GEN
 #define BITBOARD_GEN
+
+#if defined(__APPLE__)
+    #include <libkern/OSByteOrder.h>
+    #define bswap_32(x) OSSwapInt32(x)
+    #define bswap_64(x) OSSwapInt64(x)
+#elif defined(__linux__)
+    #include <endian.h>
+    #define bswap_32(x) __bswap_32(x)
+    #define bswap_64(x) __bswap_64(x)
+#elif defined(_WIN32)
+    #include <stdlib.h>
+    #define bswap_32(x) _byteswap_ulong(x)
+    #define bswap_64(x) _byteswap_uint64(x)
+#else
+    #error "Byte swapping functions are not defined for this platform."
+#endif
 
 #define WHITE 0
 #define BLACK 1

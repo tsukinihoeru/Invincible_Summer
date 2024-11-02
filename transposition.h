@@ -4,6 +4,8 @@
 //
 //  Created by Harry Chiu on 10/27/24.
 //
+#include <cstdint>
+
 #ifndef TRANSPOSITION_H
 #define TRANSPOSITION_H
 
