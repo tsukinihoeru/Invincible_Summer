@@ -17,6 +17,7 @@ void print_move(uint16_t move);
 class Engine{
 public:
     int nodes = 0;
+    int null_cutoffs = 0;
     
     //evaluation stored here after every search, used for aspiration window
     int16_t root_search_eval = 0;
@@ -27,6 +28,11 @@ public:
     void set_board(std::string fen){board_manager.set_board(fen);}
     
     //Search section, in search.cpp
+    uint16_t search_iterate_null(int time_limit_ms);
+    uint16_t search_root_null(int alpha, int beta, int depth);
+    int16_t negamax_tt_pvs_null(int alpha, int beta, int depth, int ply, bool is_pv, bool can_null);
+    
+    //Old search functions
     uint16_t search_iterate(int time_limit_ms);
     uint16_t pick_move(int depth);
     uint16_t pick_move_basic(int depth);
