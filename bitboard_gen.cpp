@@ -416,6 +416,36 @@ bool Bitboard_Gen::is_in_check(){
     return false;
 }
 
+bool Bitboard_Gen::position_in_check(){
+    int king_source = get_square_index(bitboards[current_side] & bitboards[KING_BOARD]);
+    U64 occupied = bitboards[WHITE] | bitboards[BLACK];
+    //potential squares the king can be attacked by pawns
+    U64 board = pawn_capture_lookup[current_side][king_source];
+    if(board & bitboards[!current_side] & bitboards[PAWN_BOARD])
+        return true;
+    
+    //knights and kings are easy
+    if(knight_move_lookup[king_source] & bitboards[!current_side] & bitboards[KNIGHT_BOARD])
+        return true;
+    if(king_move_lookup[king_source]  & bitboards[!current_side] & bitboards[KING_BOARD])
+        return true;
+    
+    //check diagonal rays
+    board = hyp_quint(king_source, occupied, diagonal_masks[source_to_diagonal[king_source]]);
+    board |= hyp_quint(king_source, occupied, antidiagonal_masks[source_to_antidiagonal[king_source]]);
+    if(board & bitboards[!current_side] & (bitboards[BISHOP_BOARD] | bitboards[QUEEN_BOARD])){
+        return true;
+    }
+    
+    //check orthogonal rays
+    board = hyp_quint(king_source, occupied, file_masks[source_to_file[king_source]]);
+    board |= hyp_quint_horiz(king_source, occupied, rank_masks[source_to_rank[king_source]]);
+    if(board & bitboards[!current_side] & (bitboards[ROOK_BOARD] | bitboards[QUEEN_BOARD])){
+        return true;
+    }
+    return false;
+}
+
 //generates all squares attacked by side
 U64 Bitboard_Gen::generate_attacked_squares(bool side){
     //union of all attacked squares
@@ -636,6 +666,26 @@ void Bitboard_Gen::unmake_move(uint16_t move){
     zobrist_hash ^= zobrist_keys.castling[game_history[ply].castling_rights];
     zobrist_hash ^= zobrist_keys.ep_squares[game_history[ply].ep_target];
 }
+
+void Bitboard_Gen::make_null_move(){
+    uint8_t same_castling_rights = game_history[ply].castling_rights;
+    zobrist_hash ^= zobrist_keys.ep_squares[game_history[ply].ep_target];
+    ply++;
+    game_history[ply] = game_state(same_castling_rights, 0, 0);
+    current_side = !current_side;
+    zobrist_hash ^= zobrist_keys.color;
+    //zobrist_hash ^= zobrist_keys.castling[same_castling_rights]; -> May be source of error?, unlikely though
+    zobrist_hash ^= zobrist_keys.ep_squares[0];
+}
+
+void Bitboard_Gen::unmake_null_move(){
+    zobrist_hash ^= zobrist_keys.ep_squares[0];
+    ply--;
+    current_side = !current_side;
+    zobrist_hash ^= zobrist_keys.color;
+    zobrist_hash ^= zobrist_keys.ep_squares[game_history[ply].ep_target];
+}
+
 
 U64 Bitboard_Gen::perft(int depth){
     if (depth == 0){
