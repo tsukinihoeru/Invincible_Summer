@@ -105,7 +105,10 @@ public:
     void add_piece(int piece, int square_index);
     void remove_piece(int source);
     
+    //to test move legality, the king can be captured
     bool is_in_check();
+    //The usual one, side to move needs to escape check
+    bool position_in_check();
     
     int generate_moves(uint16_t * move_list);
     int generate_moves(uint16_t * move_list, bool side);
@@ -120,6 +123,8 @@ public:
     
     void make_move(uint16_t move);
     void unmake_move(uint16_t move);
+    void make_null_move();
+    void unmake_null_move();
     U64 perft(int depth);
     
     bool check_consistency();
