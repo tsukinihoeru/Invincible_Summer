@@ -7,15 +7,23 @@
 #ifndef ENGINE_CORE_H
 #define ENGINE_CORE_H
 #include "bitboard_gen.h"
+#include <chrono>
+#include <thread>
+
 #define DOUBLE_INF 0x1002
 #define INF 0x1001
 #define CHECKMATE_SCORE 0x1000
 #define MAX_DEPTH 30
 
+//what the engine returns in case of a draw
+#define CONTEMPT 0
+#define MAX_HISTORY_SCORE 262144
+
 void print_move(uint16_t move);
 
 class Engine{
 public:
+    //debug variables, currently unused, sitting here collecting dust
     int nodes = 0;
     int null_cutoffs = 0;
     
@@ -25,12 +33,15 @@ public:
     //Constructor
     Engine() : board_manager("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"), transposition_table(128){};
     Engine(std::string fen) : board_manager(fen), transposition_table(128){};
-    void set_board(std::string fen){board_manager.set_board(fen);}
+    void set_board(std::string fen){board_manager.set_board(fen); reset();}
+    void reset();
     
     //Search section, in search.cpp
     uint16_t search_iterate_null(int time_limit_ms);
     uint16_t search_root_null(int alpha, int beta, int depth);
     int16_t negamax_tt_pvs_null(int alpha, int beta, int depth, int ply, bool is_pv, bool can_null);
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_search_time;
+    int search_time_limit;
     
     //Old search functions
     uint16_t search_iterate(int time_limit_ms);
@@ -45,11 +56,15 @@ public:
     int dumb_search(int depth);
     
     //order moves for search
+    int history_heuristics[16][64] = {0};
+    void update_heuristics(int piece, int dest, int bonus);
+    void age_heuristics();
     void order_moves(uint16_t *move_list, int num_moves, int start_index);
     void order_best_first(uint16_t *move_list, int num_moves, uint16_t best_move);
     inline int get_move_score(uint16_t move);
     
     bool is_checkmate(); //don't actually use in search functions, for debugging only
+    bool is_repetition();
     
     //Evaluation section, specified in evaluation.cpp
     int16_t get_table_eval();
