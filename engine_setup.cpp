@@ -12,6 +12,24 @@ void Engine::print_board(){
     board_manager.print_board();
 }
 
+void Engine::reset(){
+    for(int i = 0; i < 16; i++){
+        for(int j = 0; j < 64; j++){
+            history_heuristics[i][j] = 0;
+        }
+    }
+    transposition_table.clear();
+}
+
+bool Engine::is_repetition(){
+    for(int i = 2; i <= board_manager.ply && i < 8; i += 2){
+        if(board_manager.hash_history[board_manager.ply - i] == board_manager.hash_history[board_manager.ply]){
+            return true;
+        }
+    }
+    return false;
+}
+
 bool Engine::is_checkmate(){
     uint16_t move_list[256];
     int length = board_manager.generate_moves(move_list);
