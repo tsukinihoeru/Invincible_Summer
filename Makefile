@@ -8,7 +8,7 @@ CXXFLAGS = -Wall -g
 TARGET = main
 
 # Source files
-SRCS = bitboard_gen.cpp engine_setup.cpp evaluation.cpp main.cpp search.cpp
+SRCS = bitboard_gen.cpp engine_setup.cpp evaluation.cpp main.cpp search.cpp move_ordering.cpp old_searches.cpp
 
 # Object files (from .cpp files)
 OBJS = $(SRCS:.cpp=.o)
